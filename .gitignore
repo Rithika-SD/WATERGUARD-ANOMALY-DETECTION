@@ -1,0 +1,26 @@
+# Node & Frontend
+node_modules/
+frontend/node_modules/
+frontend/dist/
+.vite/
+
+# Python & Backend
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.venv
+env/
+venv/
+ENV/
+.pytest_cache/
+
+# Databases & Cache
+*.db-journal
+*.sqlite3-journal
+
+# IDE & OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
