@@ -1,5 +1,5 @@
 import numpy as np
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Optional
 
 def compute_risk_score(
     consumption_current: float,
@@ -9,10 +9,12 @@ def compute_risk_score(
     consecutive_night_intervals: int = 0,
     z_score: float = 0.0,
     rainfall_flood_risk: float = 0.0,
-    stuck_counter: int = 0
+    stuck_counter: int = 0,
+    cfi_score: Optional[float] = None
 ) -> Tuple[float, str, List[str]]:
     """
     Computes a risk score (0-100) and risk level, returning explanation evidence list.
+    Preserves all existing anomaly rules while seamlessly incorporating the Coastal Flood Index (CFI).
     """
     score = 0.0
     evidence = []
@@ -47,10 +49,18 @@ def compute_risk_score(
         score += 20
         evidence.append(f"Meter reading static at identical non-zero value ({consumption_current:.1f}L) for {stuck_counter} consecutive intervals.")
 
-    # 5. Coastal Flood Risk Factor
-    if rainfall_flood_risk > 0.7:
+    # 5. Coastal Flood Index (CFI) Integration
+    # Use cfi_score if explicitly provided, else fall back to rainfall_flood_risk for backwards compatibility
+    effective_cfi = cfi_score if cfi_score is not None else rainfall_flood_risk
+    if effective_cfi >= 0.75:
+        score += 15
+        evidence.append(f"Critical Coastal Flood Index (CFI: {effective_cfi:.2f}) active. Severe vulnerability to drainage backflow & coastal surge.")
+    elif effective_cfi >= 0.50:
         score += 10
-        evidence.append(f"High coastal flood/drainage blockage risk index ({rainfall_flood_risk:.2f}) active for building area.")
+        evidence.append(f"High Coastal Flood Index (CFI: {effective_cfi:.2f}) active for building area.")
+    elif effective_cfi >= 0.25:
+        score += 5
+        evidence.append(f"Moderate Coastal Flood Index (CFI: {effective_cfi:.2f}) active.")
 
     final_score = min(100.0, round(score, 1))
 

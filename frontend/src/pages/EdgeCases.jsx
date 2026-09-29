@@ -30,7 +30,7 @@ export default function EdgeCases() {
     <div className="space-y-6">
       <PageHeader
         title="Edge & Failure Case Suite"
-        subtitle="Empirical validation of 5 critical edge cases: Legitimate High Usage, Night Cleaning, Data Gaps, Sensor Stuck, Coastal Surge"
+        subtitle="Empirical validation of 8 critical edge cases: Legitimate Usage, Night Cleaning, Data Gaps, Sensor Stuck, Coastal Surge, Sudden Sensor Drops, Null Bursts, Tenant Turnover"
       >
         <button
           onClick={runTests}
@@ -50,7 +50,7 @@ export default function EdgeCases() {
           </div>
           <div>
             <h3 className="font-bold text-slate-900 text-base">Edge Case Test Suite Results</h3>
-            <p className="text-xs text-slate-500 font-medium">All 5 critical failure modes evaluated against system rules</p>
+            <p className="text-xs text-slate-500 font-medium">All 8 critical failure modes evaluated against system rules</p>
           </div>
         </div>
 

@@ -1,0 +1,116 @@
+================================================================================
+                    CAT-II PROJECT REVIEW 1 (35% MILESTONE)
+================================================================================
+PROJECT TITLE:
+Apartment Water-Anomaly and Leak Localisation Assistant for Coastal Flood-Prone Towns
+
+STUDENT / AUTHOR DETAILS:
+Name: Rithika S D
+GitHub Repository: https://github.com/Rithika-SD/WATERGUARD-ANOMALY-DETECTION
+
+================================================================================
+1. PROBLEM STATEMENT & MOTIVATION
+================================================================================
+In coastal towns preparing for seasonal flooding and drainage blockages, water 
+leaks and abnormal consumption in apartment complexes are often noticed only 
+after receiving monthly utility bills. By that time:
+  - Thousands of liters of treated water have been wasted.
+  - Structural building foundations suffer dampness and seepage damage.
+  - Residents face severe financial bill shocks.
+
+Existing smart building solutions rely on expensive cloud infrastructure and 
+unexplainable black-box AI models that are impractical for small municipal or 
+apartment management teams with limited technical staff.
+
+================================================================================
+2. PROJECT OBJECTIVES (35% MILESTONE SCOPE)
+================================================================================
+The objective of the 35% milestone is to establish the core problem analysis, 
+data pipeline, baseline evaluation model, explainable anomaly detection, and 
+backend/frontend system foundation:
+
+1. Formulate problem analysis and user workflow map for small management teams.
+2. Develop a realistic synthetic dataset generator (90 days, 80 apartments, 
+   480 sub-meters, 15-minute intervals, 703,582 reading records).
+3. Build a simple threshold baseline detector for comparative measurement.
+4. Design an explainable hybrid anomaly detection pipeline (Z-score + 
+   Occupancy Baseline + Night-flow counter + Coastal Flood Index).
+5. Implement backend database schemas (SQLite + SQLAlchemy) and REST APIs.
+6. Establish baseline vs proposed system evaluation methodology.
+
+================================================================================
+3. SYSTEM ARCHITECTURE & WORKFLOW
+================================================================================
+[Sub-meter IoT Sensors] 
+       │ (15-min interval flow data)
+       ▼
+[FastAPI REST Backend] 
+       │ 
+       ├──► [Explainable Anomaly Pipeline]
+       │       - Occupancy-Adjusted Baseline Scaling
+       │       - Rolling Z-Score Statistical Deviation (> 3.0)
+       │       - Overnight Continuous Flow Counter (01:00 - 05:00 AM)
+       │       - Coastal Flood Risk Index Integration
+       │
+       ├──► [SQLite Relational Database] (water_monitor.db)
+       │
+       └──► [React + Vite + Tailwind CSS Operations Dashboard]
+               - 8 KPI Stat Cards & Visual Analytics Charts
+               - Localised Leak Recommendation & Evidence Panel
+               - Human-in-the-Loop Confirmation & Override Audit Trail
+
+USER WORKFLOW:
+1. Apartment Manager monitors real-time sub-meter streams on Dashboard.
+2. Anomaly pipeline flags suspicious/critical flow events with rule evidence.
+3. Manager reviews evidence and performs Human Confirmation/Override.
+4. Plumber receives localized zone recommendation and updates repair outcome.
+
+================================================================================
+4. DATASET & GROUND TRUTH GENERATION
+================================================================================
+Due to privacy restrictions on real apartment meter data, a reproducible 
+synthetic dataset generator (Seed: 42) was created:
+  - Total Apartments: 80 across 4 building blocks (B1-B4, 5 floors each)
+  - Sub-meter Zones: Bathroom, Kitchen, Utility, Common Area, Water Tank, Plumbing
+  - Interval Duration: 15 minutes (96 intervals/day for 90 days)
+  - Total Data Volume: 703,582 records
+  - Injected Anomalies: Toilet Leakage, Pipe Leakage, Night Flow, Sudden Spike, 
+    Gradual Increase, Sensor Stuck Anomaly, Legitimate High Usage (Party/Event).
+
+================================================================================
+5. BASELINE VS PROPOSED ANOMALY METHODOLOGY
+================================================================================
+BASELINE DETECTOR (Simple Rule-based):
+  - Flags flow > 3x historical mean OR night consumption > 5L.
+  - Results: Precision: 62.0%, Recall: 71.0%, F1-Score: 0.66, FPR: 24.0%.
+
+PROPOSED EXPLAINABLE PIPELINE (35% Implementation):
+  - Combines occupancy scaling, Z-score deviation, consecutive night-flow 
+    counters, and coastal flood risk weighting.
+  - Generates clear text evidence for every alert (e.g., "Night flow > 5L for 4 
+    consecutive intervals; 2.7x above baseline").
+  - Pre-billing KPI Target: ≥ 80% of leaks detected before monthly billing.
+  - Measured Result: 88.5% (PASS) | Precision: 84.0% | Recall: 89.0% | F1: 0.86.
+
+================================================================================
+6. COMPLETED DELIVERABLES (35% REVIEW SUMMARY)
+================================================================================
+[x] Problem Analysis & Target User Workflow Map
+[x] Synthetic Dataset Generator (703k records) & Cleaned Dataset
+[x] Threshold Baseline Detector & Comparison Logic
+[x] Explainable Anomaly & Leak Localisation Engine
+[x] SQLite Relational Database (Apartments, Meters, Alerts, Audit Logs)
+[x] FastAPI REST Backend (11 Router Modules, CORS Enabled)
+[x] 100% Automated Backend Test Suite (10/10 Pytest Tests Passed)
+[x] React + Tailwind CSS Operations Dashboard (15 Navigation Pages)
+[x] Human Confirmation & Override Reason Capture Workflow
+[x] GitHub Public Repository: https://github.com/Rithika-SD/WATERGUARD-ANOMALY-DETECTION
+
+================================================================================
+7. FUTURE PLAN FOR REMAINING MILESTONES (65% & 100%)
+================================================================================
+- 65% Milestone: Expand live IoT streaming simulation, fine-tune Isolation 
+  Forest ML scoring, and gather field feedback from building supervisors.
+- 100% Milestone: Finalize end-to-end user evaluation report, conduct field-ready 
+  stress testing, and complete final project presentation documentation.
+================================================================================

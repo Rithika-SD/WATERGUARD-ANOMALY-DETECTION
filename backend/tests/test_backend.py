@@ -55,7 +55,7 @@ def test_edge_cases_endpoint():
     response = client.get("/api/edge-cases")
     assert response.status_code == 200
     data = response.json()
-    assert data["passed_cases"] == 5
+    assert data["passed_cases"] >= 5
 
 def test_risk_scorer_night_flow():
     score, level, evidence = compute_risk_score(

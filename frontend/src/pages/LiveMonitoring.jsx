@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { Activity, RefreshCw, Filter, Building2 } from 'lucide-react'
 import PageHeader from '../components/PageHeader'
 import AlertBadge from '../components/AlertBadge'
+import StreamingMeterControl from '../components/StreamingMeterControl'
 
 export default function LiveMonitoring() {
   const [apts, setApts] = useState([])
@@ -73,6 +74,9 @@ export default function LiveMonitoring() {
           </button>
         </div>
       </PageHeader>
+
+      {/* Streaming Feed Simulator & Reading Buffer */}
+      <StreamingMeterControl onSimulationComplete={fetchData} />
 
       {/* Filter Toolbar */}
       <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs flex flex-wrap items-center justify-between gap-4">

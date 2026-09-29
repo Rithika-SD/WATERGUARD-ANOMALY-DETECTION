@@ -6,7 +6,7 @@ from backend.database import engine, Base
 from backend.routers import (
     dashboard, apartments, alerts, analytics, 
     evaluation, maintenance, audit, zones, 
-    stakeholder, edge_cases, cost_impact
+    stakeholder, edge_cases, cost_impact, cfi, streaming
 )
 import os, sys
 
@@ -40,6 +40,8 @@ app.include_router(zones.router)
 app.include_router(stakeholder.router)
 app.include_router(edge_cases.router)
 app.include_router(cost_impact.router)
+app.include_router(cfi.router)
+app.include_router(streaming.router)
 
 @app.get("/api/health", tags=["Health"])
 def health_check():
