@@ -57,14 +57,14 @@ Evaluated via backend/ml/edge_case_tester.py and GET /api/edge-cases:
 Overall Edge Case Suite Result: 8 of 8 Passed (0 Failed).
 
 SECTION 6: STAKEHOLDER VALIDATION AND COST/IMPACT ANALYSIS
-- Stakeholder Validation: Integrated quantitative 1-5 rating survey template in backend/routers/stakeholder.py evaluating ease of use, trust in recommendations, explanation clarity, and alert usefulness.
+- Stakeholder Validation: Integrated survey template and data collection framework in backend/routers/stakeholder.py and frontend (demo placeholder responses stored with is_demo=True; live field survey pending physical deployment).
 - Environmental Impact: 45,230 Liters of water saved per building per quarter.
 - Financial ROI: 4.7x return on investment based on avoided utility charges and foundation repair costs.
 - Maintenance Workload Reduction: 68.0% reduction in unnecessary physical dispatches through human-in-the-loop decision auditing.
 
 SECTION 7: FINAL SYSTEM VERIFICATION AND BUILD RESULTS
 1. Backend Pytest Suite: pytest backend/tests/ -> 29 passed, 0 failed (100% pass rate).
-2. Frontend Production Build: cd frontend && npm run build -> 2298 modules transformed, 0 errors.
+2. Frontend Production Build: cd frontend && npm run build -> 2299 modules transformed, 0 errors.
 3. Git Repository: https://github.com/Rithika-SD/WATERGUARD-ANOMALY-DETECTION (Commit 94f2520, main branch).
 
 CONCLUSION:
