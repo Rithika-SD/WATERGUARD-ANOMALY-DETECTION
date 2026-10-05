@@ -7,6 +7,7 @@ from backend.ml.streaming_simulator import StreamingBuffer, StreamingSimulator
 client = TestClient(app)
 
 def test_normal_chronological_readings():
+    """Streaming Unit Test: Verifies normal chronological meter feeds are accepted into buffer."""
     buffer = StreamingBuffer(lateness_window_minutes=120)
     base_time = datetime(2026, 6, 1, 10, 0)
     
@@ -23,9 +24,9 @@ def test_normal_chronological_readings():
     assert buffer.rejected_count == 0
 
 def test_delayed_readings_within_window():
+    """Streaming Unit Test: Verifies delayed readings arriving within lateness window are accepted and flagged as delayed."""
     buffer = StreamingBuffer(lateness_window_minutes=120)
     event_time = datetime(2026, 6, 1, 10, 0)
-    # Arrives 45 minutes late
     ingest_time = event_time + timedelta(minutes=45)
     
     r = {"meter_id": "M1", "event_timestamp": "2026-06-01 10:00:00", "consumption_liters": 4.5}
@@ -37,6 +38,7 @@ def test_delayed_readings_within_window():
     assert buffer.delayed_count == 1
 
 def test_out_of_order_readings_reordered():
+    """Streaming Unit Test: Verifies out-of-order packet arrivals are re-sorted by event_timestamp prior to baseline calculation."""
     buffer = StreamingBuffer(lateness_window_minutes=120)
     base_time = datetime(2026, 6, 1, 10, 0)
     
@@ -50,12 +52,12 @@ def test_out_of_order_readings_reordered():
     assert res["is_out_of_order"] is True
     assert buffer.out_of_order_count == 1
     
-    # Check that buffer maintains chronological order by event_dt
     sorted_readings = buffer.get_sorted_readings()
     assert sorted_readings[0]["event_timestamp"] == "2026-06-01 10:15:00"
     assert sorted_readings[1]["event_timestamp"] == "2026-06-01 10:30:00"
 
 def test_duplicate_reading_rejection():
+    """Error Handling Test: Verifies duplicate readings with identical (meter_id, event_timestamp) are rejected with DUPLICATE_READING."""
     buffer = StreamingBuffer(lateness_window_minutes=120)
     base_time = datetime(2026, 6, 1, 10, 0)
     r = {"meter_id": "M1", "event_timestamp": "2026-06-01 10:00:00", "consumption_liters": 5.0}
@@ -70,6 +72,7 @@ def test_duplicate_reading_rejection():
     assert buffer.rejected_count == 1
 
 def test_invalid_timestamp_rejection():
+    """Error Handling Test: Verifies unparseable or missing event timestamps are rejected with INVALID_TIMESTAMP."""
     buffer = StreamingBuffer(lateness_window_minutes=120)
     r = {"meter_id": "M1", "event_timestamp": "NOT_A_DATE", "consumption_liters": 5.0}
     
@@ -79,6 +82,7 @@ def test_invalid_timestamp_rejection():
     assert buffer.rejection_reasons["INVALID_TIMESTAMP"] == 1
 
 def test_missing_consumption_value_rejection():
+    """Error Handling Test: Verifies missing/NaN consumption values are rejected with MISSING_CONSUMPTION_VALUE."""
     buffer = StreamingBuffer(lateness_window_minutes=120)
     r = {"meter_id": "M1", "event_timestamp": "2026-06-01 10:00:00", "consumption_liters": None}
     
@@ -88,9 +92,9 @@ def test_missing_consumption_value_rejection():
     assert buffer.rejection_reasons["MISSING_CONSUMPTION_VALUE"] == 1
 
 def test_exceeded_lateness_window_rejection():
-    buffer = StreamingBuffer(lateness_window_minutes=60) # 1 hour max lateness
+    """Error Handling Test: Verifies readings arriving past lateness window threshold are rejected with EXCEEDED_LATENESS_WINDOW."""
+    buffer = StreamingBuffer(lateness_window_minutes=60)
     event_time = datetime(2026, 6, 1, 10, 0)
-    # Arrives 150 minutes late (2.5 hours)
     ingest_time = event_time + timedelta(minutes=150)
     
     r = {"meter_id": "M1", "event_timestamp": "2026-06-01 10:00:00", "consumption_liters": 5.0}
@@ -101,12 +105,11 @@ def test_exceeded_lateness_window_rejection():
     assert buffer.rejection_reasons["EXCEEDED_LATENESS_WINDOW"] == 1
 
 def test_streaming_api_endpoints():
-    # 1. Reset
+    """API Integration Test: Verifies POST /api/streaming/start, status, and reset endpoints."""
     response = client.post("/api/streaming/reset")
     assert response.status_code == 200
     assert response.json()["status"] == "IDLE"
     
-    # 2. Start Normal Simulation
     start_res = client.post("/api/streaming/start", json={"mode": "normal", "count": 20, "lateness_window_minutes": 120})
     assert start_res.status_code == 200
     data = start_res.json()
@@ -114,14 +117,12 @@ def test_streaming_api_endpoints():
     assert data["processed_count"] == 20
     assert data["rejected_count"] == 0
     
-    # 3. Start Duplicate Simulation
     dup_res = client.post("/api/streaming/start", json={"mode": "duplicate", "count": 15, "lateness_window_minutes": 120})
     assert dup_res.status_code == 200
     dup_data = dup_res.json()
     assert dup_data["duplicate_count"] > 0
     assert dup_data["rejected_count"] > 0
 
-    # 4. Status Check
     status_res = client.get("/api/streaming/status")
     assert status_res.status_code == 200
     assert status_res.json()["status"] == "COMPLETED"

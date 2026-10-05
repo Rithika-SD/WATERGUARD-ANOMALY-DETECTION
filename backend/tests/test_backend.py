@@ -2,7 +2,7 @@ import pytest
 import os, sys
 from fastapi.testclient import TestClient
 
-# Ensure root path is in sys.path
+# Ensure root path is in sys.path for test execution
 sys.path.append(os.getcwd())
 
 from backend.main import app
@@ -13,15 +13,18 @@ from backend.ml.edge_case_tester import EdgeCaseTester
 client = TestClient(app)
 
 def test_api_health():
+    """Integration Test: Verifies system health check endpoint /api/health."""
     response = client.get("/api/health")
     assert response.status_code == 200
     assert response.json()["status"] == "ok"
 
 def test_dataset_files_exist():
+    """Unit Test: Verifies that raw and cleaned CSV dataset files exist in data/ directory."""
     assert os.path.exists("data/raw_dataset.csv")
     assert os.path.exists("data/cleaned_dataset.csv")
 
 def test_dashboard_endpoint():
+    """API Integration Test: Verifies GET /api/dashboard returns apartment metrics & recent alerts."""
     response = client.get("/api/dashboard")
     assert response.status_code == 200
     data = response.json()
@@ -30,6 +33,7 @@ def test_dashboard_endpoint():
     assert "recent_alerts" in data
 
 def test_apartments_endpoint():
+    """API Integration Test: Verifies GET /api/apartments returns non-empty array of apartments."""
     response = client.get("/api/apartments")
     assert response.status_code == 200
     apts = response.json()
@@ -37,12 +41,14 @@ def test_apartments_endpoint():
     assert len(apts) > 0
 
 def test_alerts_endpoint():
+    """API Integration Test: Verifies GET /api/alerts returns alerts list."""
     response = client.get("/api/alerts")
     assert response.status_code == 200
     alerts = response.json()
     assert isinstance(alerts, list)
 
 def test_evaluation_endpoint():
+    """API Integration Test: Verifies GET /api/evaluation returns baseline, proposed, and KPI metrics."""
     response = client.get("/api/evaluation")
     assert response.status_code == 200
     data = response.json()
@@ -52,12 +58,14 @@ def test_evaluation_endpoint():
     assert data["kpi"]["status"] in ["PASS", "FAIL"]
 
 def test_edge_cases_endpoint():
+    """API Integration Test: Verifies GET /api/edge-cases returns edge case evaluation results."""
     response = client.get("/api/edge-cases")
     assert response.status_code == 200
     data = response.json()
     assert data["passed_cases"] >= 5
 
 def test_risk_scorer_night_flow():
+    """Unit Test: Verifies risk scoring engine classifies high night flow as Critical risk with evidence."""
     score, level, evidence = compute_risk_score(
         consumption_current=12.0,
         consumption_expected=1.0,
@@ -72,6 +80,7 @@ def test_risk_scorer_night_flow():
     assert len(evidence) > 0
 
 def test_leak_localiser_disclaimer():
+    """Unit Test: Verifies leak localiser outputs mandatory recommendation disclaimer."""
     res = localise_leak(
         apartment_id="B1-101",
         building_id="B1",
@@ -85,12 +94,11 @@ def test_leak_localiser_disclaimer():
     assert "RECOMMENDATION ONLY" in res["disclaimer"]
 
 def test_human_confirmation_workflow():
-    # Fetch alerts
+    """Workflow Integration Test: Verifies staff confirmation workflow, status update, and audit tracking."""
     alerts_resp = client.get("/api/alerts")
     alerts = alerts_resp.json()
     if alerts:
         alert_id = alerts[0]["alert_id"]
-        # Confirm investigation
         confirm_resp = client.post(
             f"/api/alerts/{alert_id}/confirm",
             json={
@@ -102,7 +110,6 @@ def test_human_confirmation_workflow():
         )
         assert confirm_resp.status_code == 200
         
-        # Verify status updated
         detail_resp = client.get(f"/api/alerts/{alert_id}")
         assert detail_resp.status_code == 200
         assert detail_resp.json()["status"] == "Confirmed"

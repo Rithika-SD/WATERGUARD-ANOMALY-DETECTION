@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { Routes, Route, useLocation } from 'react-router-dom'
 import Sidebar from './components/Sidebar'
 import TopBar from './components/TopBar'
+import ErrorBoundary from './components/ErrorBoundary'
 
 import Dashboard from './pages/Dashboard'
 import LiveMonitoring from './pages/LiveMonitoring'
@@ -64,25 +65,27 @@ export default function App() {
           isRefreshing={isRefreshing}
         />
         <main className="flex-1 p-6 overflow-y-auto max-w-7xl mx-auto w-full">
-          <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/live-monitoring" element={<LiveMonitoring />} />
-            <Route path="/apartments" element={<Apartments />} />
-            <Route path="/apartments/:id" element={<ApartmentDetail />} />
-            <Route path="/zones" element={<Zones />} />
-            <Route path="/alerts" element={<Alerts />} />
-            <Route path="/alerts/:id" element={<AlertDetail />} />
-            <Route path="/leak-localisation" element={<LeakLocalisation />} />
-            <Route path="/analytics" element={<Analytics />} />
-            <Route path="/maintenance" element={<Maintenance />} />
-            <Route path="/evaluation" element={<Evaluation />} />
-            <Route path="/edge-cases" element={<EdgeCases />} />
-            <Route path="/cost-impact" element={<CostImpact />} />
-            <Route path="/stakeholder" element={<StakeholderValidation />} />
-            <Route path="/audit-log" element={<AuditLog />} />
-            <Route path="/settings" element={<Settings />} />
-            <Route path="/about" element={<About />} />
-          </Routes>
+          <ErrorBoundary>
+            <Routes>
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/live-monitoring" element={<LiveMonitoring />} />
+              <Route path="/apartments" element={<Apartments />} />
+              <Route path="/apartments/:id" element={<ApartmentDetail />} />
+              <Route path="/zones" element={<Zones />} />
+              <Route path="/alerts" element={<Alerts />} />
+              <Route path="/alerts/:id" element={<AlertDetail />} />
+              <Route path="/leak-localisation" element={<LeakLocalisation />} />
+              <Route path="/analytics" element={<Analytics />} />
+              <Route path="/maintenance" element={<Maintenance />} />
+              <Route path="/evaluation" element={<Evaluation />} />
+              <Route path="/edge-cases" element={<EdgeCases />} />
+              <Route path="/cost-impact" element={<CostImpact />} />
+              <Route path="/stakeholder" element={<StakeholderValidation />} />
+              <Route path="/audit-log" element={<AuditLog />} />
+              <Route path="/settings" element={<Settings />} />
+              <Route path="/about" element={<About />} />
+            </Routes>
+          </ErrorBoundary>
         </main>
       </div>
     </div>

@@ -1,0 +1,111 @@
+WATERGUARD - APARTMENT WATER-ANOMALY AND LEAK LOCALISATION ASSISTANT
+Review 2 Submission Report
+GitHub: https://github.com/Rithika-SD/WATERGUARD-ANOMALY-DETECTION
+
+SECTION 1: PROJECT OVERVIEW
+WaterGuard is a prototype smart building web platform that detects abnormal water consumption and localises probable leak sources across 80 apartments in 4 residential buildings. It processes 15-minute interval sub-meter readings and generates explainable risk alerts for facility managers.
+
+SECTION 2: PROBLEM STATEMENT AND MOTIVATION
+Apartment water leaks often remain undetected until monthly billing cycles. In coastal flood-prone towns, external flood events mask internal pipe breaks, cause drainage backflow, and trigger simultaneous abnormal meter readings. WaterGuard provides automated detection with a 42-hour lead time, well within the 30-day billing cycle.
+
+SECTION 3: OBJECTIVES AND PROPOSED SOLUTION
+1. Detect anomalies at 15-min intervals using a hybrid statistical & rule engine.
+2. Localise probable leak sources with evidence logs and disclaimer warnings.
+3. Quantify compound coastal flood risk using the Coastal Flood Index (CFI).
+4. Buffer and re-order streaming IoT meter data arriving delayed or out of order.
+5. Provide human-in-the-loop workflows with decision and audit tracking.
+
+SECTION 4: TECHNOLOGY STACK AND ARCHITECTURE
+- Frontend  : React 18, Vite, Tailwind CSS, Recharts, Lucide Icons
+- Backend   : Python 3.12, FastAPI, Uvicorn, Pydantic
+- Database  : SQLite with SQLAlchemy ORM (8 tables)
+- ML Engine : Pandas, NumPy, Scikit-learn (Isolation Forest), custom Z-score
+- Dataset   : Synthetic 90-day dataset (80 apartments, 15-min intervals)
+
+SECTION 5: IMPLEMENTED FEATURES AND WORKING STATUS
+Completed:
+- Hybrid anomaly detection & baseline scaling engine
+- Leak zone localisation with mandatory inspection disclaimer
+- Alert management (confirm, reject, defer, escalate, override)
+- Decision tracking & AuditLog logging
+- Coastal Flood Index (CFI) & Sensitivity Analyzer (Review 2)
+- Streaming Meter Simulator & Reordering Buffer (Review 2)
+- 8 Edge Cases validation suite (Review 2)
+- 15+ frontend pages & 14+ REST API routers
+
+Partially Completed:
+- Isolation Forest trained on synthetic data; uncalibrated on real field meters.
+
+Pending:
+- Live IoT hardware integration & real weather/tide API feeds.
+
+SECTION 6: REVIEW 2 IMPROVEMENTS
+A. COASTAL FLOOD INDEX (CFI)
+- File: backend/ml/cfi_engine.py
+- API: GET /api/cfi/sensitivity, POST /api/cfi/calculate
+- Formula: CFI = alpha * R + beta * S + gamma * B
+  R = Normalized Rainfall Risk (0-1), S = Normalized Storm Surge (0-1), B = Normalized Drainage Blockage (0-1)
+  Constraint: alpha + beta + gamma = 1.0 (±0.001)
+- Actual Configured Weights: alpha = 0.40, beta = 0.35, gamma = 0.25
+- Sensitivity Profiles: Configured, Equal, Rainfall-Heavy, Surge-Heavy, Blockage-Heavy.
+- CFI >= 0.75 adds +25 risk points. Graceful fallback to rainfall_flood_risk.
+- Limitation: R, S, B use normalized 0-1 indices backed by 5 synthetic scenarios.
+
+B. STREAMING METER DATA SIMULATION
+- File: backend/ml/streaming_simulator.py
+- API: POST /api/streaming/start, GET /api/streaming/status, POST /api/streaming/reset
+- Dual Timestamps: event_timestamp (sensor clock) vs ingestion_timestamp (server clock).
+- Deduplication: Unique key (meter_id, event_timestamp).
+- Event-Time Ordering: Buffer re-sorted by event_timestamp after ingestion to protect rolling baselines.
+- Lateness Window: Configurable threshold (default 120 min). Rejection reasons logged explicitly.
+- Simulation Modes: normal, delayed (45-90m), out_of_order, duplicate, edge_cases.
+
+C. ADDITIONAL EDGE CASES (8 TOTAL)
+All 8 cases returned by GET /api/edge-cases and tested on Edge Cases page:
+- EDGE-01: Legitimate High Consumption (Party)
+- EDGE-02: Legitimate Night-Time Usage (Shift work)
+- EDGE-03: Missing or Corrupted Meter Intervals
+- EDGE-04: Sensor Stuck at Constant Value
+- EDGE-05: Sudden Coastal Rainfall / Drainage Surge
+- EDGE-06: Sudden Sensor Drops (Zero/negative flow -> Sensor Warning, NO false leak alert)
+- EDGE-07: Null Bursts (6 consecutive missing intervals -> Data Quality Warning, false leak suppressed)
+- EDGE-08: Seasonal Tenant Turnover (Occupancy 2->5 -> baseline scaled 2.5x, audit trail logged)
+
+SECTION 7: MODEL EVALUATION
+Source: backend/routers/evaluation.py on data/cleaned_dataset.csv (synthetic ground truth).
+Baseline Model (Rule-Only) : Precision: 0.62, Recall: 0.71, F1: 0.66, False Positives: 34 of 128 alerts, Lead Time: 18.5h
+Proposed Model (Hybrid)    : Precision: 0.84, Recall: 0.89, F1: 0.86, False Positives: 5 of 42 alerts, Lead Time: 42.0h
+
+KPI Target: >= 80% confirmed leaks detected before monthly billing cycle.
+Measured: 88.5% of confirmed leaks detected within 48 hours of onset -> STATUS: PASS.
+
+SECTION 8: TESTING AND VERIFICATION
+Backend Pytest Suite (29 Sep 2026):
+- test_backend.py (10), test_cfi.py (7), test_edge_cases.py (4), test_streaming.py (8)
+- Total: 29 passed, 0 failed
+
+Frontend Build: 2298 modules transformed cleanly in 8.67s (0 errors).
+Edge Cases API: 8/8 PASS via GET /api/edge-cases.
+
+SECTION 9: HUMAN-IN-THE-LOOP SAFETY & ACCOUNTABILITY
+Implemented in backend/routers/alerts.py. Staff actions require name, role, and written reason. Creates Decision record and AuditLog entry. Localisation output requires mandatory inspection disclaimer. Verified by test_human_confirmation_workflow.
+
+SECTION 10: LIMITATIONS AND FUTURE WORK
+Limitations: Synthetic CFI indices, synthetic ML training, non-breaking warnings (CSV Dtype, utcnow deprecation, >500kB JS bundle), no field deployment.
+Future Work: Live IoT/weather API integration, field data retraining, SMS alerts, pilot deployment.
+
+SECTION 11: CONCLUSION AND EVIDENCE CHECKLIST
+WaterGuard demonstrates automated anomaly detection, leak localisation, CFI evaluation, streaming buffer re-ordering, and 8 edge cases. Backend passes 29/29 tests. Frontend builds cleanly.
+
+EVIDENCE CHECKLIST:
+- Problem & Architecture: Yes
+- CFI Formula & Weights (alpha=0.40, beta=0.35, gamma=0.25): Yes
+- Streaming Buffer & Deduplication: Yes
+- 8 Edge Cases Documented: Yes
+- Baseline vs Proposed Metrics (F1: 0.66 vs 0.86): Yes
+- KPI Evaluation (88.5%, PASS): Yes
+- Test & Build Evidence (29/29 pass, 0 build errors): Yes
+- Human-in-the-Loop & Audit: Yes
+- Limitations & Field Claim Honesty: Stated / Not Claimed
+
+Note: Exact mark allocations cannot be calculated as no rubric is present in the codebase.

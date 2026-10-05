@@ -6,7 +6,7 @@ from backend.ml.edge_case_tester import EdgeCaseTester
 client = TestClient(app)
 
 def test_sudden_sensor_drops_evaluation():
-    # Test negative reading and sudden zero drop
+    """Edge-Case Unit Test (EDGE-06): Verifies sudden zero/negative flow drops raise sensor warnings, NOT false leaks."""
     readings = [12.5, 12.0, -1.5, 0.0]
     result = EdgeCaseTester.evaluate_sudden_sensor_drop(readings)
     
@@ -17,7 +17,7 @@ def test_sudden_sensor_drops_evaluation():
     assert "Negative sensor reading detected" in result["evidence"][0] or "Sudden drop" in result["evidence"][0]
 
 def test_null_burst_evaluation():
-    # Test 6 consecutive nulls
+    """Edge-Case Unit Test (EDGE-07): Verifies consecutive null/NaN readings trigger Data Quality Warning & suppress false leak alerts."""
     readings = [10.0, None, None, None, None, None, None, 10.5]
     result = EdgeCaseTester.evaluate_null_burst(readings)
     
@@ -28,7 +28,7 @@ def test_null_burst_evaluation():
     assert "Null burst detected: 6 consecutive missing intervals" in result["evidence"][0]
 
 def test_tenant_turnover_evaluation():
-    # Test occupancy update from 2 to 5 residents
+    """Edge-Case Unit Test (EDGE-08): Verifies occupancy changes scale consumption baselines proportionally without false leak alarms."""
     result = EdgeCaseTester.evaluate_tenant_turnover(
         old_occupancy=2,
         new_occupancy=5,
@@ -45,6 +45,7 @@ def test_tenant_turnover_evaluation():
     assert "Validated occupancy change logged" in result["evidence"][0]
 
 def test_all_8_edge_cases_api():
+    """API Integration Test: Verifies GET /api/edge-cases returns all 8 evaluated edge cases with PASS status."""
     response = client.get("/api/edge-cases")
     assert response.status_code == 200
     data = response.json()
